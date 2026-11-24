@@ -1,3 +1,4 @@
+//========================================================================================
 //1. Project Setup 
 // Create a new project directory and initialize it with npm.
 // Install the necessary packages: express, mongoose, bcrypt, jsonwebtoken, and dotenv.
@@ -5,6 +6,7 @@
 // and a User model based on the schema from Lesson 1.
 // Establish a connection to your MongoDB database. Use a .env file 
 // to store your MONGO_URI, a JWT_SECRET, and a PORT.
+//=======================================================================================
 
 
 //Configure our .env file

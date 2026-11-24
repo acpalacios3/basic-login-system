@@ -1,8 +1,17 @@
 import express from "express";
 import User from "../models/User.js";
+import jwt from "jsonwebtoken"; //Used for login, not for user registration
 
 const router = express.Router();
 
+// we retrieve the environment variable key to use it when the token is generated
+// setup our JWT Token secret & expiration time
+const secret = process.env.JWT_SECRET;
+const expiration = "2h";
+
+
+
+//====================================================================================
 // 2. Build the Registration Endpoint
 // Create a POST route (e.g., /api/users/register).
 // In this route, take the username, email, and password from the req.body.
@@ -13,6 +22,7 @@ const router = express.Router();
 // The pre-save hook you wrote in Lesson 1 should automatically hash the password.
 // Save the new user to the database.
 // Respond with a 201 status and the newly created user object (excluding the password).
+//=====================================================================================
 
 
 router.post("/api/users/register", async (req, res) => {
@@ -55,4 +65,43 @@ router.post("/api/users/register", async (req, res) => {
     }
 });
 
+//===================================================================================================================================================================
+// 3. Build the Login Endpoint
+// Create a POST route (e.g., /api/users/login).
+// In this route, take the email and password from the req.body.
+// Find a user in the database with the matching email. If no user is found, return a 400 status with a generic error message (e.g., “Incorrect email or password.”).
+
+// If a user is found, use the isCorrectPassword instance method (or bcrypt.compare) to compare the incoming password with the user’s stored hashed password.
+// If the passwords do not match, return a 400 status with the same generic error message.
+// If the passwords match, create a JWT for the user using the jsonwebtoken library. The payload should contain non-sensitive user data like their _id and username.
+// Respond with a JSON object containing the signed token and the user’s data.
+//============================================================================================================================================================
+
+router.post("/api/users/login", async (req, res) => {
+    try {
+        if (!req.body.email || !req.body.password) {
+            throw new Error("Incomplete Data from request.");
+        }
+        const user = await User.findOne({ email: req.body.email });
+
+        if (!user) {
+            return res.status(400).json({ message: "Incorrect email or password" });
+        }
+
+        const correctPw = await user.isCorrectPassword(req.body.password);
+
+        if (!correctPw) {
+            return res.status(400).json({ message: "Incorrect email or password" });
+        }
+
+    } catch (err) {
+        res.status(500).json({
+            message: "Something went wrong: " + err.message
+        });
+    }
+});
+
 export default router;
+
+
+
