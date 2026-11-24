@@ -10,44 +10,50 @@
 
 //Configure our .env file
 import "dotenv/config";
+
 import express from "express";
 import mongoose from "mongoose";
 import User from "./models/User.js";
 import jwt from "jsonwebtoken";
 
 
-// Windows code snippet so we can connect to MongoDB...
-import dns from "node:dns";
-dns.setServers(["1.1.1.1", "8.8.8.8"]);
-
 // setup our JWT Token secret & expiration time
 const secret = process.env.JWT_SECRET;
 
-// Define our App
+// Create our App Express
 const app = express();
 
+// It’s a middleware that allows Express to read JSON data coming in the body of an HTTP request.
 app.use(express.json());
 
 // and the PORT we will use to connect to it
 const PORT = process.env.PORT || 3000;
 
 
-// and connect to our database 
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log("Connected to MongoDB!");
-  })
-  .catch((error) => {
-    console.log("Not connected to Database");
-    console.error(error);
-  });
-
 
   // Welcome Base route
 app.get("/", (req, res) => {
   res.send("Welcome to our Authentication API!");
 });
+
+// Connect to MongoDB database
+async function connectDB() {
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+
+    console.log("Connected to MongoDB!");
+
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+
+  } catch (error) {
+    console.log("Not connected to Database");
+    console.error(error);
+  }
+}
+
+connectDB();
 
 // 2. Build the Registration Endpoint
 // Create a POST route (e.g., /api/users/register).
@@ -73,6 +79,8 @@ app.post("/api/users/register", async (req, res) => {
 });
 
 
+
+// Start the server and make it listen for requests on the indicated port
 app.listen(PORT, () => {
   console.log("Server running at http://localhost:" + PORT);
 });
