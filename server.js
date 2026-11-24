@@ -1,4 +1,3 @@
-// https://ps-lms.vercel.app/curriculum/se/418/lab-1
 //1. Project Setup 
 // Create a new project directory and initialize it with npm.
 // Install the necessary packages: express, mongoose, bcrypt, jsonwebtoken, and dotenv.
@@ -15,6 +14,7 @@ import express from "express";
 import mongoose from "mongoose";
 import User from "./models/User.js";
 import jwt from "jsonwebtoken";
+import userRoutes from "./routes/userRoutes.js"
 
 
 // setup our JWT Token secret & expiration time
@@ -25,13 +25,12 @@ const app = express();
 
 // It’s a middleware that allows Express to read JSON data coming in the body of an HTTP request.
 app.use(express.json());
+app.use(userRoutes);
 
 // and the PORT we will use to connect to it
 const PORT = process.env.PORT || 3000;
 
-
-
-  // Welcome Base route
+// Welcome Base route
 app.get("/", (req, res) => {
   res.send("Welcome to our Authentication API!");
 });
@@ -42,10 +41,12 @@ async function connectDB() {
     await mongoose.connect(process.env.MONGO_URI);
 
     console.log("Connected to MongoDB!");
-
+    
+    // Start the server and make it listen for requests on the indicated port
     app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+      console.log("Server running at http://localhost:" + PORT);
     });
+
 
   } catch (error) {
     console.log("Not connected to Database");
@@ -55,32 +56,3 @@ async function connectDB() {
 
 connectDB();
 
-// 2. Build the Registration Endpoint
-// Create a POST route (e.g., /api/users/register).
-// In this route, take the username, email, and password from the req.body.
-// Check if a user with the given email already exists. If so, return a 400 status 
-// with an appropriate message.
-
-// If the user does not exist, create a new User document with the provided data. 
-// The pre-save hook you wrote in Lesson 1 should automatically hash the password.
-// Save the new user to the database.
-// Respond with a 201 status and the newly created user object (excluding the password).
-
-
-
-
-app.post("/api/users/register", async (req, res) => {
-    try {
-    const response = await User.create(req.body);
-    res.status(201).json(response);
-  } catch (err) {
-    res.status(500).send("Something went wrong: " + err.message);
-  }
-});
-
-
-
-// Start the server and make it listen for requests on the indicated port
-app.listen(PORT, () => {
-  console.log("Server running at http://localhost:" + PORT);
-});
